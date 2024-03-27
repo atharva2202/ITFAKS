@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -75,9 +76,30 @@ def landing():
     if 'username' in session:
         conn = sqlite3.connect('medicine.db')
         c = conn.cursor()
-        c.execute("SELECT * FROM medicines")
+
+        # Get sorting parameters
+        sort_by = request.args.get('sort_by', 'name')
+        sort_order = request.args.get('sort_order', 'asc')
+
+        # Construct SQL query based on sorting parameters
+        if sort_by == 'name':
+            order_by = 'name ' + sort_order
+        elif sort_by == 'expiry':
+            order_by = 'expiry_date ' + sort_order
+        else:
+            order_by = 'name ASC'  # Default sorting
+
+        c.execute("SELECT * FROM medicines ORDER BY " + order_by)
         medicines = c.fetchall()
         conn.close()
+
+        # Calculate number of days until expiry for each medicine
+        today = datetime.now().date()
+        for med in medicines:
+            expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
+            med_days_until_expiry = (expiry_date - today).days
+            med = med[:4] + (med_days_until_expiry,) + med[4:]
+
         return render_template('landing.html', medicines=medicines, username=session['username'])
     else:
         return redirect('/')
@@ -98,7 +120,25 @@ def fetch_medicines():
     c.execute("SELECT * FROM medicines")
     medicines = c.fetchall()
     conn.close()
-    return medicines
+
+def update_days_remaining():
+    conn = sqlite3.connect('medicine.db')
+    c = conn.cursor()
+    c.execute("SELECT id, expiry_date FROM medicines")
+    medicines = c.fetchall()
+
+    # Get current date
+    today = datetime.now().date()
+
+    # Update days remaining for each medicine
+    for med_id, expiry_date in medicines:
+        expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d").date()
+        days_remaining = (expiry_date - today).days
+        c.execute("UPDATE medicines SET days_remaining = ? WHERE id = ?", (days_remaining, med_id))
+
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
 
 # Route to add medicine info
 @app.route('/add_info', methods=['POST'])
@@ -114,14 +154,55 @@ def add_info():
                   (name, expiry_date, installation_date, status))
         conn.commit()
         conn.close()
-        
-        # Update global variable with latest medicines
-        global medicines
-        medicines = fetch_medicines()
-        
+
+        # Update days remaining for all medicines
+        update_days_remaining()
+
         return redirect('/landing')
     else:
         return redirect('/')
+
+# Route to delete medicine info
+@app.route('/delete_info/<int:medicine_id>', methods=['POST'])
+def delete_info(medicine_id):
+    if 'username' in session:
+        conn = sqlite3.connect('medicine.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM medicines WHERE id=?", (medicine_id,))
+        conn.commit()
+        conn.close()
+
+        return redirect('/landing')
+    else:
+        return redirect('/')
+    
+
+
+
+# Route to update medicine info
+
+# Route for updating medicine information
+@app.route('/update_info/<int:medicine_id>', methods=['POST'])
+def update_info(medicine_id):
+    if 'username' in session:
+        if request.method == 'POST':
+            name = request.form['medicineName']
+            expiry_date = request.form['expiryDate']
+            installation_date = request.form['installationDate']
+            status = request.form['medicineStatus']
+            conn = sqlite3.connect('medicine.db')
+            c = conn.cursor()
+            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, status=? WHERE id=?",
+                      (name, expiry_date, installation_date, status, medicine_id))
+            conn.commit()
+            conn.close()
+            return redirect('/landing')
+        else:
+            return redirect('/landing')  # Redirect to landing page if method is not POST
+    else:
+        return redirect('/')  # Redirect to login if user is not logged in
+
+
 
 # Route for logout
 @app.route('/logout')

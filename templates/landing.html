@@ -34,6 +34,7 @@
   <!-- Add Info Button -->
 <button type="button" class="btn btn-primary mb-4" id="addInfoBtn" data-toggle="modal" data-target="#addInfoModal">Add Info</button>
 
+
 <!-- Add Info Modal -->
 <div class="modal fade" id="addInfoModal" tabindex="-1" role="dialog" aria-labelledby="addInfoModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -73,30 +74,132 @@
 </div>
 
 
-  <!-- Table to display medicine inventory -->
+<!-- Update Info Modal -->
+
+
+
 <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">Serial Number</th>
-        <th scope="col">Name of Medicine</th>
-        <th scope="col">Expiry Date</th>
-        <th scope="col">Date of Installation</th>
-        <th scope="col">Status of Medicine</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for medicine in medicines %}
-      <tr>
-        <th scope="row">{{ loop.index }}</th>
-        <td>{{ medicine[1] }}</td>
-        <td>{{ medicine[2] }}</td>
-        <td>{{ medicine[3] }}</td>
-        <td>{{ medicine[4] }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  
+  <thead>
+    <tr>
+      <th scope="col">Serial Number</th>
+      <th scope="col">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="nameSortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sort
+            </button>
+            <div class="dropdown-menu" aria-labelledby="nameSortDropdown">
+                <a class="dropdown-item" href="/landing?sort=name_asc">A-Z</a>
+                <a class="dropdown-item" href="/landing?sort=name_desc">Z-A</a>
+            </div>
+        </div>
+        Name of Medicine
+    </th>
+    
+    <th scope="col">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="expirySortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sort
+            </button>
+            <div class="dropdown-menu" aria-labelledby="expirySortDropdown">
+                <a class="dropdown-item" href="/landing?sort=expiry_asc">Earliest to Expire</a>
+                <a class="dropdown-item" href="/landing?sort=expiry_desc">Latest to Expire</a>
+            </div>
+        </div>
+        Expiry Date
+    </th>
+    
+      <th scope="col">Date of Installation</th>
+      <th scope="col">Status of Medicine</th>
+      <th scope="col">Days Remaining until Expiry</th>
+      <th scope="col">Actions</th> <!-- New Column for Actions -->
+    </tr>
+  </thead>
+  <tbody>
+    {% for medicine in medicines %}
+    <tr>
+      <th scope="row">{{ loop.index }}</th>
+      <td>{{ medicine[1] }}</td>
+      <td>{{ medicine[2] }}</td>
+      <td>{{ medicine[3] }}</td>
+      <td>{{ medicine[4] }}</td>
+      <td>{{ medicine[5] }}</td>
+      <td>
+        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ medicine[0] }}">Delete</button>
+      </td>
+      <td>
+        <form action="/update_info/{{ medicine[0] }}" method="POST">
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </td>
+    </tr>
+    <!-- Delete Confirmation Modal for Each Medicine -->
+    <div class="modal fade" id="deleteModal{{ medicine[0] }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ medicine[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel{{ medicine[0] }}">Confirm Deletion</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete "{{ medicine[1] }}"?
+          </div>
+          <div class="modal-footer">
+            <form action="/delete_info/{{ medicine[0] }}" method="POST">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="updateModal{{ medicine[0] }}" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel{{ medicine[0] }}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <!-- Modal Header -->
+              <div class="modal-header">
+                  <h5 class="modal-title" id="updateModalLabel{{ medicine[0] }}">Update Medicine Information</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <!-- Modal Body -->
+              <div class="modal-body">
+                  <!-- Update Form -->
+                  <form action="/update_info/{{ medicine[0] }}" method="POST">
+                    <div class="form-group">
+                        <label for="medicineName">Name of Medicine</label>
+                        <input type="text" class="form-control" id="medicineName" name="medicineName" value="{{ medicine[1] }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date</label>
+                        <input type="date" class="form-control" id="expiryDate" name="expiryDate" value="{{ medicine[2] }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="installationDate">Date of Installation</label>
+                        <input type="date" class="form-control" id="installationDate" name="installationDate" value="{{ medicine[3] }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="medicineStatus">Status of Medicine</label>
+                        <select class="form-control" id="medicineStatus" name="medicineStatus">
+                            <option value="Active" {% if medicine[4] == 'Active' %} selected {% endif %}>Active</option>
+                            <option value="Inactive" {% if medicine[4] == 'Inactive' %} selected {% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                    <!-- Save Button -->
+                    <button type="submit" class="btn btn-success">Save</button>
+                </form>
+                
+              </div>
+          </div>
+      </div>
+  </div>
+    {% endfor %}
+  </tbody>
+</table>
 </div>
 
 <!-- Bootstrap JS and jQuery (needed for Bootstrap components) -->
@@ -106,3 +209,4 @@
 
 </body>
 </html>
+

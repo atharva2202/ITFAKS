@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Tracker</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Medicine Tracker</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto">
+        <!-- Add logout button -->
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  
+
+<!-- Content -->
+<div class="container mt-4">
+  <h2 class="mb-4">Medicine Inventory</h2>
+
+  <!-- Add Info Button -->
+<button type="button" class="btn btn-primary mb-4" id="addInfoBtn" data-toggle="modal" data-target="#addInfoModal">Add Info</button>
+
+<!-- Add Info Modal -->
+<div class="modal fade" id="addInfoModal" tabindex="-1" role="dialog" aria-labelledby="addInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addInfoModalLabel">Add Medicine Info</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addInfoForm" method="POST" action="/add_info">
+          <div class="form-group">
+            <label for="medicineName">Name of Medicine</label>
+            <input type="text" class="form-control" id="medicineName" name="medicineName" required>
+          </div>
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date</label>
+            <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
+          </div>
+          <div class="form-group">
+            <label for="installationDate">Date of Installation</label>
+            <input type="date" class="form-control" id="installationDate" name="installationDate" required>
+          </div>
+          <div class="form-group">
+            <label for="medicineStatus">Status of Medicine</label>
+            <select class="form-control" id="medicineStatus" name="medicineStatus" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Table to display medicine inventory -->
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Serial Number</th>
+        <th scope="col">Name of Medicine</th>
+        <th scope="col">Expiry Date</th>
+        <th scope="col">Date of Installation</th>
+        <th scope="col">Status of Medicine</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for medicine in medicines %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        <td>{{ medicine[1] }}</td>
+        <td>{{ medicine[2] }}</td>
+        <td>{{ medicine[3] }}</td>
+        <td>{{ medicine[4] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+</div>
+
+<!-- Bootstrap JS and jQuery (needed for Bootstrap components) -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

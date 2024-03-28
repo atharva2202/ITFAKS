@@ -6,6 +6,36 @@
     <title>Medicine Tracker</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        /* Additional CSS for responsive design */
+        @media (min-width: 576px) {
+            /* Adjust spacing for medium screens */
+            .container {
+                max-width: 540px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            /* Adjust spacing for large screens */
+            .container {
+                max-width: 720px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            /* Adjust spacing for extra large screens */
+            .container {
+                max-width: 960px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            /* Adjust spacing for extra extra large screens */
+            .container {
+                max-width: 1140px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -78,40 +108,36 @@
 
 
 
-<table class="table">
-  <thead>
+<table class="table table-bordered table-hover">
+  <thead class="thead-dark">
     <tr>
       <th scope="col">Serial Number</th>
       <th scope="col">
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="nameSortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Sort
-            </button>
-            <div class="dropdown-menu" aria-labelledby="nameSortDropdown">
-                <a class="dropdown-item" href="/landing?sort=name_asc">A-Z</a>
-                <a class="dropdown-item" href="/landing?sort=name_desc">Z-A</a>
-            </div>
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="nameSortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Name of Medicine
+          </button>
+          <div class="dropdown-menu" aria-labelledby="nameSortDropdown">
+            <a class="dropdown-item" href="/landing?sort=name_asc">A-Z</a>
+            <a class="dropdown-item" href="/landing?sort=name_desc">Z-A</a>
+          </div>
         </div>
-        Name of Medicine
-    </th>
-    
-    <th scope="col">
+      </th>
+      <th scope="col">
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="expirySortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Sort
-            </button>
-            <div class="dropdown-menu" aria-labelledby="expirySortDropdown">
-                <a class="dropdown-item" href="/landing?sort=expiry_asc">Earliest to Expire</a>
-                <a class="dropdown-item" href="/landing?sort=expiry_desc">Latest to Expire</a>
-            </div>
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="expirySortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Expiry Date
+          </button>
+          <div class="dropdown-menu" aria-labelledby="expirySortDropdown">
+            <a class="dropdown-item" href="/landing?sort=expiry_asc">Earliest to Expire</a>
+            <a class="dropdown-item" href="/landing?sort=expiry_desc">Latest to Expire</a>
+          </div>
         </div>
-        Expiry Date
-    </th>
-    
+      </th>
       <th scope="col">Date of Installation</th>
       <th scope="col">Status of Medicine</th>
       <th scope="col">Days Remaining until Expiry</th>
-      <th scope="col">Actions</th> <!-- New Column for Actions -->
+      <th scope="col">Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -125,12 +151,11 @@
       <td>{{ medicine[5] }}</td>
       <td>
         <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ medicine[0] }}">Delete</button>
-      </td>
-      <td>
         <form action="/update_info/{{ medicine[0] }}" method="POST">
-            <button type="submit" class="btn btn-primary">Update</button>
+          <button type="submit" class="btn btn-primary btn-sm">Update</button>
         </form>
-    </td>
+      </td>
+      
     </tr>
     <!-- Delete Confirmation Modal for Each Medicine -->
     <div class="modal fade" id="deleteModal{{ medicine[0] }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ medicine[0] }}" aria-hidden="true">
@@ -209,4 +234,3 @@
 
 </body>
 </html>
-

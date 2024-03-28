@@ -72,6 +72,8 @@ def signup():
 
 # Route for landing page
 @app.route('/landing')
+# Route for landing page
+@app.route('/landing')
 def landing():
     if 'username' in session:
         conn = sqlite3.connect('medicine.db')
@@ -84,8 +86,12 @@ def landing():
         # Construct SQL query based on sorting parameters
         if sort_by == 'name':
             order_by = 'name ' + sort_order
-        elif sort_by == 'expiry':
+        elif sort_by == 'expiry_date':
             order_by = 'expiry_date ' + sort_order
+        elif sort_by == 'installation_date':
+            order_by = 'installation_date ' + sort_order
+        elif sort_by == 'days_remaining':
+            order_by = 'days_remaining ' + sort_order
         else:
             order_by = 'name ASC'  # Default sorting
 
@@ -184,24 +190,19 @@ def delete_info(medicine_id):
 # Route for updating medicine information
 @app.route('/update_info/<int:medicine_id>', methods=['POST'])
 def update_info(medicine_id):
-    if 'username' in session:
-        if request.method == 'POST':
-            name = request.form['medicineName']
-            expiry_date = request.form['expiryDate']
-            installation_date = request.form['installationDate']
-            status = request.form['medicineStatus']
-            conn = sqlite3.connect('medicine.db')
-            c = conn.cursor()
-            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, status=? WHERE id=?",
-                      (name, expiry_date, installation_date, status, medicine_id))
-            conn.commit()
-            conn.close()
-            return redirect('/landing')
-        else:
-            return redirect('/landing')  # Redirect to landing page if method is not POST
-    else:
-        return redirect('/')  # Redirect to login if user is not logged in
+    if request.method == 'POST':
+        name = request.form['medicineName']
+        expiry_date = request.form['expiryDate']
+        installation_date = request.form['installationDate']
+        status = request.form['medicineStatus']
+        conn = sqlite3.connect('medicine.db')
+        c = conn.cursor()
+        c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, status=? WHERE id=?",
+                (name, expiry_date, installation_date, status, medicine_id))
+        conn.commit()
+        conn.close()
 
+        return redirect('/landing')
 
 
 # Route for logout

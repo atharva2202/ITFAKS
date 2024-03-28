@@ -183,10 +183,6 @@ def delete_info(medicine_id):
         return redirect('/')
     
 
-
-
-# Route to update medicine info
-
 # Route for updating medicine information
 @app.route('/update_info/<int:medicine_id>', methods=['POST'])
 def update_info(medicine_id):

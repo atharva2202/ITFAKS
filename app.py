@@ -181,24 +181,30 @@ def delete_info(medicine_id):
         return redirect('/landing')
     else:
         return redirect('/')
-    
 
-# Route for updating medicine information
+
+# Route to update medicine info
 @app.route('/update_info/<int:medicine_id>', methods=['POST'])
 def update_info(medicine_id):
-    if request.method == 'POST':
-        name = request.form['medicineName']
-        expiry_date = request.form['expiryDate']
-        installation_date = request.form['installationDate']
-        status = request.form['medicineStatus']
-        conn = sqlite3.connect('medicine.db')
-        c = conn.cursor()
-        c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, status=? WHERE id=?",
-                (name, expiry_date, installation_date, status, medicine_id))
-        conn.commit()
-        conn.close()
+    if 'username' in session:
+        if request.method == 'POST':
+            name = request.form['medicineName']
+            expiry_date = request.form['expiryDate']
+            installation_date = request.form['installationDate']
+            status = request.form['medicineStatus']
+            conn = sqlite3.connect('medicine.db')
+            c = conn.cursor()
+            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, status=? WHERE id=?",
+                      (name, expiry_date, installation_date, status, medicine_id))
+            conn.commit()
+            conn.close()
 
-        return redirect('/landing')
+            # Update days remaining for all medicines
+            update_days_remaining()
+
+            return redirect('/landing')
+    else:
+        return redirect('/')
 
 
 # Route for logout

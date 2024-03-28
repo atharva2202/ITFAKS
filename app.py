@@ -181,8 +181,6 @@ def delete_info(medicine_id):
         return redirect('/landing')
     else:
         return redirect('/')
-    
-
 
 
 # Route to update medicine info

@@ -6,6 +6,7 @@
   <title>MediCare</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     /* Additional CSS for responsive design */
     @media (min-width: 576px) {
@@ -45,14 +46,23 @@
   
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
-      <!-- Add logout button -->
+      <!-- Add greeting line with username -->
       <li class="nav-item">
-        <a class="nav-link" href="/logout">Logout</a>
+        <span class="navbar-text">
+          Hello, {{ username }}
+        </span>
+      </li>
+      <!-- Add logout button icon -->
+      <li class="nav-item">
+        <a class="nav-link" href="/logout">
+          <i class="fas fa-sign-out-alt" style="color: white;"></i>
+        </a>
       </li>
     </ul>
   </div>
 </nav>
-  
+
+
 
 <!-- Content -->
 <div class="container mt-4">

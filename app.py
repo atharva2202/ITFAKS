@@ -6,6 +6,8 @@ import smtplib
 from flask import send_from_directory
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import schedule
+import time
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -109,7 +111,7 @@ def landing():
         # Calculate number of days until expiry for each medicine
         today = datetime.now().date()
 
-# Initialize variables to store details of expiring medicines
+        # Initialize variables to store details of expiring medicines
         expiring_medicines = []
         expired_medicines = []
 
@@ -209,73 +211,76 @@ def send_mail(subject, message, to_email):
     except Exception as e:
         print("Error sending email:", str(e))
 
-# Route to add medicine info
-@app.route('/add_info', methods=['POST'])
-def add_info():
-    if 'username' in session:
-        name = request.form['medicineName']
-        expiry_date = request.form['expiryDate']
-        installation_date = request.form['installationDate']
-        quantity = request.form['medicineQuantity']
-        conn = sqlite3.connect('medicine.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO medicines (name, expiry_date, installation_date, quantity) VALUES (?, ?, ?, ?)",
-                  (name, expiry_date, installation_date, quantity))
-        conn.commit()
-        conn.close()
-
+# Function to check and send email at 11 PM
+def check_and_send_email():
+    current_time = datetime.now().time()
+    if current_time.hour == 23 and current_time.minute == 10:
+        print("Checking medicines and sending email...")
         # Update days remaining for all medicines
         update_days_remaining()
 
-        return redirect('/landing')
-    else:
-        return redirect('/')
-
-# Route to delete medicine info
-@app.route('/delete_info/<int:medicine_id>', methods=['POST'])
-def delete_info(medicine_id):
-    if 'username' in session:
+        # Fetch all medicines
         conn = sqlite3.connect('medicine.db')
         c = conn.cursor()
-        c.execute("DELETE FROM medicines WHERE id=?", (medicine_id,))
-        conn.commit()
+        c.execute("SELECT * FROM medicines")
+        medicines = c.fetchall()
         conn.close()
 
-        return redirect('/landing')
-    else:
-        return redirect('/')
+        # Calculate number of days until expiry for each medicine
+        today = datetime.now().date()
 
+        # Initialize variables to store details of expiring medicines
+        expiring_medicines = []
+        expired_medicines = []
 
-# Route to update medicine info
-@app.route('/update_info/<int:medicine_id>', methods=['POST'])
-def update_info(medicine_id):
-    if 'username' in session:
-        if request.method == 'POST':
-            name = request.form['medicineName']
-            expiry_date = request.form['expiryDate']
-            installation_date = request.form['installationDate']
-            quantity = request.form['medicineQuantity']
-            conn = sqlite3.connect('medicine.db')
-            c = conn.cursor()
-            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, quantity=? WHERE id=?",
-                      (name, expiry_date, installation_date, quantity, medicine_id))
-            conn.commit()
-            conn.close()
+        for med in medicines:
+            expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
+            med_days_until_expiry = (expiry_date - today).days
+            med = med[:4] + (med_days_until_expiry,) + med[4:]
 
-            # Update days remaining for all medicines
-            update_days_remaining()
+            # Check if medicine's expiry is within specified range
+            if med_days_until_expiry in [30, 15, 10, 5, 4, 3, 2, 1]:
+                expiring_medicines.append(med)
 
-            return redirect('/landing')
-    else:
-        return redirect('/')
+            # Check if medicine has already expired
+            if med[4] < 0:
+                expired_medicines.append(med)
 
+        # Prepare message body for expiring medicines
+        expiring_message = ""
+        for med in expiring_medicines:
+            expiring_message += f"- {med[1]} is expiring in {med[4]} days.\n"
 
-# Route for logout
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    return redirect('/')
+        # Prepare message body for expired medicines
+        expired_message = ""
+        for med in expired_medicines:
+            expired_message += f"- {med[1]} has already expired.\n"
+
+        # Concatenate expiring and expired messages
+        message_body = ""
+        if expiring_message:
+            message_body += "Medicines Expiring Soon:\n" + expiring_message + "\n"
+        if expired_message:
+            message_body += "Expired Medicines:\n" + expired_message + "\n"
+
+        # Send email with concatenated message body
+        if message_body:
+            send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
+
+        print("Email sent.")
+
+# Schedule email check every minute
+schedule.every().minute.do(check_and_send_email)
+
+# Run the scheduler in a separate thread
+def scheduler_thread():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == '__main__':
     create_table()
+    # Start scheduler thread
+    import threading
+    threading.Thread(target=scheduler_thread, daemon=True).start()
     app.run(debug=True)

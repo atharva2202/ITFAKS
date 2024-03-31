@@ -142,19 +142,16 @@
               <input type="text" class="form-control" id="medicineName" name="medicineName" required>
             </div>
             <div class="mb-3">
-              <label for="expiryDate" class="form-label">Expiry Date</label>
-              <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
-            </div>
-            <div class="mb-3">
               <label for="installationDate" class="form-label">Date of Installation</label>
               <input type="date" class="form-control" id="installationDate" name="installationDate" required>
             </div>
             <div class="mb-3">
-              <label for="medicineStatus" class="form-label">Status of Medicine</label>
-              <select class="form-select" id="medicineStatus" name="medicineStatus" required>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
+              <label for="expiryDate" class="form-label">Expiry Date</label>
+              <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
+            </div>
+            <div class="mb-3">
+              <label for="medicineQuantity" class="form-label">Quantity</label>
+              <input type="number" class="form-control" id="medicineQuantity" name="medicineQuantity" required>
             </div>
             <button type="submit" class="btn btn-success">Save</button>
           </form>
@@ -211,7 +208,7 @@
             </ul>
           </div>
         </th>
-        <th scope="col">Status of Medicine</th>
+        <th scope="col">Quantity</th>
         <th scope="col">Actions</th>
       </tr>
     </thead>
@@ -286,19 +283,16 @@
                   <input type="text" class="form-control" id="medicineName" name="medicineName" value="{{ medicine[1] }}">
                 </div>
                 <div class="mb-3">
-                  <label for="expiryDate" class="form-label">Expiry Date</label>
-                  <input type="date" class="form-control" id="expiryDate" name="expiryDate" value="{{ medicine[2] }}">
-                </div>
-                <div class="mb-3">
                   <label for="installationDate" class="form-label">Date of Installation</label>
                   <input type="date" class="form-control" id="installationDate" name="installationDate" value="{{ medicine[3] }}">
                 </div>
                 <div class="mb-3">
-                  <label for="medicineStatus" class="form-label">Status of Medicine</label>
-                  <select class="form-select" id="medicineStatus" name="medicineStatus">
-                    <option value="Active" {% if medicine[4] == 'Active' %} selected {% endif %}>Active</option>
-                    <option value="Inactive" {% if medicine[4] == 'Inactive' %} selected {% endif %}>Inactive</option>
-                  </select>
+                  <label for="expiryDate" class="form-label">Expiry Date</label>
+                  <input type="date" class="form-control" id="expiryDate" name="expiryDate" value="{{ medicine[2] }}">
+                </div>
+                <div class="mb-3">
+                  <label for="medicineQuantity" class="form-label">Quantity</label>
+                  <input type="number" class="form-control" id="medicineQuantity" name="medicineQuantity" required>
                 </div>
                 <!-- Save Button -->
                 <button type="submit" class="btn btn-success">Save</button>

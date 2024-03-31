@@ -157,7 +157,7 @@ def create_table():
     conn = sqlite3.connect('medicine.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS medicines
-                 (id INTEGER PRIMARY KEY, name TEXT, expiry_date TEXT, installation_date TEXT, status TEXT)''')
+                 (id INTEGER PRIMARY KEY, name TEXT, expiry_date TEXT, installation_date TEXT, quantity INTEGER)''')
     conn.commit()
     conn.close()
 
@@ -216,11 +216,11 @@ def add_info():
         name = request.form['medicineName']
         expiry_date = request.form['expiryDate']
         installation_date = request.form['installationDate']
-        status = request.form['medicineStatus']
+        quantity = request.form['medicineQuantity']
         conn = sqlite3.connect('medicine.db')
         c = conn.cursor()
-        c.execute("INSERT INTO medicines (name, expiry_date, installation_date, status) VALUES (?, ?, ?, ?)",
-                  (name, expiry_date, installation_date, status))
+        c.execute("INSERT INTO medicines (name, expiry_date, installation_date, quantity) VALUES (?, ?, ?, ?)",
+                  (name, expiry_date, installation_date, quantity))
         conn.commit()
         conn.close()
 
@@ -254,11 +254,11 @@ def update_info(medicine_id):
             name = request.form['medicineName']
             expiry_date = request.form['expiryDate']
             installation_date = request.form['installationDate']
-            status = request.form['medicineStatus']
+            quantity = request.form['medicineQuantity']
             conn = sqlite3.connect('medicine.db')
             c = conn.cursor()
-            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, status=? WHERE id=?",
-                      (name, expiry_date, installation_date, status, medicine_id))
+            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, quantity=? WHERE id=?",
+                      (name, expiry_date, installation_date, quantity, medicine_id))
             conn.commit()
             conn.close()
 

@@ -175,17 +175,7 @@
             </ul>
           </div>
         </th>
-        <th scope="col">
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="expirySortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              Expiry Date
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="expirySortDropdown">
-              <li><a class="dropdown-item" href="/landing?sort_by=expiry_date&sort_order=asc">Expiry Date (Earliest)</a></li>
-              <li><a class="dropdown-item" href="/landing?sort_by=expiry_date&sort_order=desc">Expiry Date (Latest)</a></li>
-            </ul>
-          </div>
-        </th>
+
         <th scope="col">
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="installationSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -197,6 +187,19 @@
             </ul>
           </div>
         </th>
+
+        <th scope="col">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="expirySortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              Expiry Date
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="expirySortDropdown">
+              <li><a class="dropdown-item" href="/landing?sort_by=expiry_date&sort_order=asc">Expiry Date (Earliest)</a></li>
+              <li><a class="dropdown-item" href="/landing?sort_by=expiry_date&sort_order=desc">Expiry Date (Latest)</a></li>
+            </ul>
+          </div>
+        </th>
+        
         <th scope="col">
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="daysRemainingSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -217,15 +220,20 @@
       <tr {% if medicine[5] <= 0 %} class="table-danger" {% elif medicine[5] <= 31 %} class="table-success" {% endif %}>
         <th scope="row">{{ loop.index }}</th>
         <td>{{ medicine[1] }}</td>
-        <td>{{ medicine[2] }}</td>
         <td>{{ medicine[3] }}</td>
+        <td>{{ medicine[2] }}</td>
+        
         <td>
           {% if medicine[5] > 0 %}
-          {{ medicine[5] }}
+            {% set remaining_days = medicine[5] %}
+            {% set years = remaining_days // 365 %}
+            {% set months = (remaining_days % 365) // 30 %}
+            {% set days = (remaining_days % 365) % 30 %}
+            {{ years }} years, {{ months }} months, {{ days }} days
           {% elif medicine[5] == 0 %}
-          <span class="text-danger">Medicine Expired</span>
+            <span class="text-danger">Medicine Expired</span>
           {% else %}
-          <span class="text-danger">Expired</span>
+            <span class="text-danger">Expired</span>
           {% endif %}
         </td>
         <td>{{ medicine[4] }}</td>
@@ -292,8 +300,9 @@
                 </div>
                 <div class="mb-3">
                   <label for="medicineQuantity" class="form-label">Quantity</label>
-                  <input type="number" class="form-control" id="medicineQuantity" name="medicineQuantity" required>
+                  <input type="number" class="form-control" id="medicineQuantity" name="medicineQuantity" value="{{ medicine[4] }}" required>
                 </div>
+                
                 <!-- Save Button -->
                 <button type="submit" class="btn btn-success">Save</button>
               </form>

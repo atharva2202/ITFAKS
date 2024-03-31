@@ -191,7 +191,7 @@ def update_days_remaining():
 # Function to send email
 def send_mail(subject, message, to_email):
     from_email = 'itfakms@gmail.com'
-    password = 'send ncxf tfvw wqgm'
+    password = 'mlnk pftp ejui jznw'
 
     msg = MIMEMultipart()
     msg['From'] = from_email

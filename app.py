@@ -146,8 +146,10 @@ def landing():
             message_body += "Expired Medicines:\n" + expired_message + "\n"
 
         # Send email with concatenated message body
-        if message_body:
-            send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
+        current_time = datetime.now()
+        if current_time.hour == 23 and current_time.minute == 30:
+            if message_body:
+                send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
 
         return render_template('landing.html', medicines=medicines, username=session['username'])
 
@@ -214,7 +216,7 @@ def send_mail(subject, message, to_email):
 # Function to check and send email at 11 PM
 def check_and_send_email():
     current_time = datetime.now().time()
-    if current_time.hour == 23 and current_time.minute == 10:
+    if current_time.hour == 23 and current_time.minute == 30:
         print("Checking medicines and sending email...")
         # Update days remaining for all medicines
         update_days_remaining()
@@ -270,7 +272,7 @@ def check_and_send_email():
         print("Email sent.")
 
 # Schedule email check every minute
-schedule.every().minute.do(check_and_send_email)
+schedule.every().day.at("23:30").do(check_and_send_email)
 
 # Run the scheduler in a separate thread
 def scheduler_thread():

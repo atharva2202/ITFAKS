@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import os
 from datetime import datetime, timedelta
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -72,8 +75,6 @@ def signup():
 
 # Route for landing page
 @app.route('/landing')
-# Route for landing page
-@app.route('/landing')
 def landing():
     if 'username' in session:
         conn = sqlite3.connect('medicine.db')
@@ -101,12 +102,47 @@ def landing():
 
         # Calculate number of days until expiry for each medicine
         today = datetime.now().date()
+
+# Initialize variables to store details of expiring medicines
+        expiring_medicines = []
+        expired_medicines = []
+
         for med in medicines:
             expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
             med_days_until_expiry = (expiry_date - today).days
             med = med[:4] + (med_days_until_expiry,) + med[4:]
 
+            # Check if medicine's expiry is within specified range
+            if med_days_until_expiry in [30, 15, 10, 5, 4, 3, 2, 1]:
+                expiring_medicines.append(med)
+
+            # Check if medicine has already expired
+            if med[4] < 0:
+                expired_medicines.append(med)
+
+        # Prepare message body for expiring medicines
+        expiring_message = ""
+        for med in expiring_medicines:
+            expiring_message += f"- {med[1]} is expiring in {med[4]} days.\n"
+
+        # Prepare message body for expired medicines
+        expired_message = ""
+        for med in expired_medicines:
+            expired_message += f"- {med[1]} has already expired.\n"
+
+        # Concatenate expiring and expired messages
+        message_body = ""
+        if expiring_message:
+            message_body += "Medicines Expiring Soon:\n" + expiring_message + "\n"
+        if expired_message:
+            message_body += "Expired Medicines:\n" + expired_message + "\n"
+
+        # Send email with concatenated message body
+        if message_body:
+            send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
+
         return render_template('landing.html', medicines=medicines, username=session['username'])
+
     else:
         return redirect('/')
 
@@ -145,6 +181,27 @@ def update_days_remaining():
     # Commit changes and close connection
     conn.commit()
     conn.close()
+
+# Function to send email
+def send_mail(subject, message, to_email):
+    from_email = 'itfakms@gmail.com'
+    password = 'send ncxf tfvw wqgm'
+
+    msg = MIMEMultipart()
+    msg['From'] = from_email
+    msg['To'] = ', '.join(to_email)
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(from_email, password)
+        server.sendmail(from_email, to_email, msg.as_string())
+        server.quit()
+        print("Email sent successfully")
+    except Exception as e:
+        print("Error sending email:", str(e))
 
 # Route to add medicine info
 @app.route('/add_info', methods=['POST'])

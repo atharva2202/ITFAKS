@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import datetime, timedelta
 import smtplib
+from flask import send_from_directory
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -37,6 +38,11 @@ def check_username(username):
     user = c.fetchone()
     conn.close()
     return user
+
+# For images
+@app.route('/images/<path:filename>')
+def serve_images(filename):
+    return send_from_directory('images', filename)
 
 # Route for login page
 @app.route('/', methods=['GET', 'POST'])

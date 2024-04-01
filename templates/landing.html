@@ -165,7 +165,7 @@
   <table class="table table-bordered table-hover">
     <thead class="thead-light">
       <tr>
-        <th scope="col">Serial Number</th>
+        <th scope="col">Sr. No.</th>
         <th scope="col">
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="nameSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -181,7 +181,7 @@
         <th scope="col">
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="installationSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              Date of Installation (YYYY MM DD)
+              Date of Installation
             </button>
             <ul class="dropdown-menu" aria-labelledby="installationSortDropdown">
               <li><a class="dropdown-item" href="/landing?sort_by=installation_date&sort_order=asc">Installation Date (Earliest)</a></li>
@@ -193,7 +193,7 @@
         <th scope="col">
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="expirySortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              Expiry Date (YYYY MM DD)
+              Expiry Date
             </button>
             <ul class="dropdown-menu" aria-labelledby="expirySortDropdown">
               <li><a class="dropdown-item" href="/landing?sort_by=expiry_date&sort_order=asc">Expiry Date (Earliest)</a></li>
@@ -232,9 +232,9 @@
             {% if remaining_days >= 30 %}
               {% set months = remaining_days // 30 %}
               {% set days = remaining_days % 30 %}
-              {{ months }} months, {{ days }} days remaining
+              {{ months }} months, {{ days }} days 
             {% else %}
-              {{ remaining_days }} days remaining
+              {{ remaining_days }} days
             {% endif %}
             {% elif medicine[5] == 0 %}
               <span class="text-danger">Medicine Expired</span>

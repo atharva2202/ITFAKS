@@ -125,6 +125,8 @@
     <button type="button" class="btn btn-primary" id="addInfoBtn" data-bs-toggle="modal" data-bs-target="#addInfoModal">
       <i class="fas fa-plus me-2"></i> Add Info
     </button>
+    <!-- View Expired Medicines Button -->
+    <a href="/expired_medicines" class="btn btn-danger">View Expired Medicines</a>
   </div>
 
   <!-- Add Info Modal -->
@@ -218,7 +220,7 @@
     </thead>
     <tbody>
       {% for medicine in medicines %}
-      <tr {% if medicine[5] <= 0 %} class="table-danger" {% elif medicine[5] <= 10 %} class="table-danger" {% elif medicine[5] <= 20 %} class="table-warning" {% elif medicine[5] <= 30 %} class="table-success" {% endif %}>
+      <tr {% if medicine[5] <= 0 %} class="table-danger" {% elif medicine[5] <= 15 %} class="table-danger" {% elif medicine[5] <= 30 %} class="table-warning" {% endif %}>
         <th scope="row">{{ loop.index }}</th>
         <td>{{ medicine[1] }}</td>
         <td>{{ medicine[3] }}</td>
@@ -227,14 +229,18 @@
         <td>
           {% if medicine[5] > 0 %}
             {% set remaining_days = medicine[5] %}
-            {% set months = remaining_days // 30 %}
-            {% set days = remaining_days % 30 %}
-            {{ months }} months, {{ days }} days remaining
-          {% elif medicine[5] == 0 %}
-            <span class="text-danger">Medicine Expired</span>
-          {% else %}
-            <span class="text-danger">Expired</span>
-          {% endif %}
+            {% if remaining_days >= 30 %}
+              {% set months = remaining_days // 30 %}
+              {% set days = remaining_days % 30 %}
+              {{ months }} months, {{ days }} days remaining
+            {% else %}
+              {{ remaining_days }} days remaining
+            {% endif %}
+            {% elif medicine[5] == 0 %}
+              <span class="text-danger">Medicine Expired</span>
+            {% else %}
+              <span class="text-danger">Expired</span>
+            {% endif %}
         </td>
        
         <td class="text-center">{{ medicine[4] }}</td>

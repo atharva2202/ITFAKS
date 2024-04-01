@@ -233,9 +233,9 @@
                 {% set months = remaining_days // 30 %}
                 {% set days = remaining_days % 30 %}
                 {% if months > 0 %}
-                    {{ months }} months, {{ days }} days remaining
+                    {{ months }} months, {{ days }} days
                 {% elif days > 0 %}
-                    {{ days }} days remaining
+                    {{ days }} days
                 {% else %}
                     <span class="text-danger">Medicine Expired</span>
                 {% endif %}

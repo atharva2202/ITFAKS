@@ -87,13 +87,18 @@ def landing():
         expired_medicines = []
 
         for med in medicines:
-            expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
-            med_days_until_expiry = (expiry_date - today).days
-            med = med[:4] + (med_days_until_expiry,) + med[4:]
+            if med[2] and med[2].strip():    
+                expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
+                med_days_until_expiry = (expiry_date - today).days
+                med = med[:4] + (med_days_until_expiry,) + med[4:]
 
-            # Check if medicine's expiry is within specified range
-            if med_days_until_expiry in [10, 5, 4, 3, 2, 1]:
-                expiring_medicines.append(med)
+                # Check if medicine's expiry is within specified range
+                if med_days_until_expiry in [10, 5, 4, 3, 2, 1]:
+                    expiring_medicines.append(med)
+
+                # Check if medicine has already expired
+                if med[4] < 0:
+                    expired_medicines.append(med)
 
             # Check if medicine has already expired
             if med[4] < 0:
@@ -235,8 +240,11 @@ def update_days_remaining():
 
     # Update days remaining for each medicine
     for med_id, expiry_date in medicines:
-        expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d").date()
-        days_remaining = (expiry_date - today).days
+        if expiry_date and expiry_date.strip():
+            expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d").date()
+            days_remaining = (expiry_date - today).days
+        else:
+            days_remaining = ''
         c.execute("UPDATE medicines SET days_remaining = ? WHERE id = ?", (days_remaining, med_id))
 
     # Commit changes and close connection
@@ -287,17 +295,18 @@ def check_and_send_email():
         expired_medicines = []
 
         for med in medicines:
-            expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
-            med_days_until_expiry = (expiry_date - today).days
-            med = med[:4] + (med_days_until_expiry,) + med[4:]
+            if expiry_date:
+                expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
+                med_days_until_expiry = (expiry_date - today).days
+                med = med[:4] + (med_days_until_expiry,) + med[4:]
 
-            # Check if medicine's expiry is within specified range
-            if med_days_until_expiry in [10, 5, 4, 3, 2, 1]:
-                expiring_medicines.append(med)
+                # Check if medicine's expiry is within specified range
+                if med_days_until_expiry in [10, 5, 4, 3, 2, 1]:
+                    expiring_medicines.append(med)
 
-            # Check if medicine has already expired
-            if med[4] < 0:
-                expired_medicines.append(med)
+                # Check if medicine has already expired
+                if med[4] < 0:
+                    expired_medicines.append(med)
 
         # Prepare message body for expiring medicines
         expiring_message = ""

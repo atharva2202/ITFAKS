@@ -149,7 +149,7 @@
             </div>
             <div class="mb-3">
               <label for="expiryDate" class="form-label">Expiry Date</label>
-              <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
+              <input type="date" class="form-control" id="expiryDate" name="expiryDate">
             </div>
             <div class="mb-3">
               <label for="medicineQuantity" class="form-label">Quantity</label>
@@ -220,27 +220,33 @@
     </thead>
     <tbody>
       {% for medicine in medicines %}
-      <tr {% if medicine[5] <= 0 %} class="table-danger" {% elif medicine[5] <= 15 %} class="table-danger" {% elif medicine[5] <= 30 %} class="table-warning" {% endif %}>
+      <tr {% if medicine[5] is defined and medicine[5] != '' %} class="{% if medicine[5]|int <= 15 %}table-danger{% elif medicine[5]|int <= 30 %}table-warning{% endif %}" {% elif medicine[2] == '' %} class="table-info" {% endif %}>
         <th scope="row">{{ loop.index }}</th>
         <td>{{ medicine[1] }}</td>
         <td>{{ medicine[3] }}</td>
         <td>{{ medicine[2] }}</td>
        
         <td>
-          {% if medicine[5] > 0 %}
-            {% set remaining_days = medicine[5] %}
-            {% if remaining_days >= 30 %}
-              {% set months = remaining_days // 30 %}
-              {% set days = remaining_days % 30 %}
-              {{ months }} months, {{ days }} days 
-            {% else %}
-              {{ remaining_days }} days
-            {% endif %}
+          {% if medicine[2] %}
+            {% if medicine[5] != ''%}
+                {% set remaining_days = medicine[5] %}
+                {% set months = remaining_days // 30 %}
+                {% set days = remaining_days % 30 %}
+                {% if months > 0 %}
+                    {{ months }} months, {{ days }} days remaining
+                {% elif days > 0 %}
+                    {{ days }} days remaining
+                {% else %}
+                    <span class="text-danger">Medicine Expired</span>
+                {% endif %}
             {% elif medicine[5] == 0 %}
-              <span class="text-danger">Medicine Expired</span>
+                <span class="text-danger">Medicine Expired</span>
             {% else %}
-              <span class="text-danger">Expired</span>
+                <span class="text-danger">Expired</span>
             {% endif %}
+          {% else %}
+            <span class="text-secondary">No expiry date</span>
+          {% endif %}
         </td>
        
         <td class="text-center">{{ medicine[4] }}</td>

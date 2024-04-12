@@ -122,11 +122,13 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Medicine Inventory</h2>
     <!-- Add Info Button -->
-    <button type="button" class="btn btn-primary" id="addInfoBtn" data-bs-toggle="modal" data-bs-target="#addInfoModal">
-      <i class="fas fa-plus me-2"></i> Add Info
-    </button>
-    <!-- View Expired Medicines Button -->
-    <a href="/expired_medicines" class="btn btn-danger">View Expired Medicines</a>
+    <div class="d-flex justify-content-end">
+      <button type="button" class="btn btn-primary me-2" id="addInfoBtn" data-bs-toggle="modal" data-bs-target="#addInfoModal">
+          <i class="fas fa-plus me-2"></i> Add Info
+      </button>
+      <a href="/expired_medicines" class="btn btn-danger">View Expired Medicines</a>
+  </div>
+  
   </div>
 
   <!-- Add Info Modal -->

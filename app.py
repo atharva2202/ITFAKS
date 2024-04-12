@@ -122,11 +122,11 @@ def landing():
             message_body += "Expired Medicines:\n" + expired_message + "\n"
 
         # Send email with concatenated message body
-        current_time = datetime.now()
+        """ current_time = datetime.now()
         if current_time.hour == 11 and current_time.minute == 21:
             if message_body:
                 send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
-
+ """
         return render_template('landing.html', medicines=medicines, username=session['username'])
 
     else:
@@ -268,14 +268,13 @@ def send_mail(subject, message, to_email):
         server.login(from_email, password)
         server.sendmail(from_email, to_email, msg.as_string())
         server.quit()
-        print("Email sent successfully")
     except Exception as e:
         print("Error sending email:", str(e))
 
 # Function to check and send email at 11 PM
 def check_and_send_email():
     current_time = datetime.now().time()
-    if current_time.hour == 11   and current_time.minute == 21:
+    if current_time.hour == 10   and current_time.minute == 20:
         print("Checking medicines and sending email...")
         # Update days remaining for all medicines
         update_days_remaining()
@@ -295,7 +294,8 @@ def check_and_send_email():
         expired_medicines = []
 
         for med in medicines:
-            if expiry_date:
+            expiry_date = med[2]
+            if expiry_date and expiry_date.strip():
                 expiry_date = datetime.strptime(med[2], '%Y-%m-%d').date()
                 med_days_until_expiry = (expiry_date - today).days
                 med = med[:4] + (med_days_until_expiry,) + med[4:]
@@ -328,11 +328,11 @@ def check_and_send_email():
         # Send email with concatenated message body
         if message_body:
             send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
-
+ 
         print("Email sent.")
 
 # Schedule email check every minute
-schedule.every().day.at("11:21").do(check_and_send_email)
+schedule.every().day.at("10:20").do(check_and_send_email)
 
 # Run the scheduler in a separate thread
 def scheduler_thread():

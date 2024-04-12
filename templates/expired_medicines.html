@@ -1,170 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Expired Medicines</title>
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f8f9fa;
-    }
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expired Medicines</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Basic styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
 
-    .navbar {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        /* Centering the table on the page */
+        .table {
+            margin: 0 auto; /* Center the table */
+            text-align: center; /* Center-align the text within cells */
+        }
 
-    .navbar-brand {
-      font-weight: 600;
-    }
+        /* Additional table styles */
+        .table th,
+        .table td {
+            text-align: center; /* Center-align the content of table headers and cells */
+        }
 
-    .navbar-text {
-      font-weight: 500;
-      color: #555;
-    }
+        /* Custom styles */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    .btn-primary {
-      background-color: #007bff;
-      border-color: #007bff;
-    }
+        .navbar-brand {
+            font-weight: 600;
+        }
 
-    .btn-primary:hover {
-      background-color: #0056b3;
-      border-color: #0056b3;
-    }
+        .navbar-text {
+            font-weight: 500;
+            color: #555;
+        }
 
-    .table {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        /* Button styles */
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
 
-    .table th {
-      font-weight: 600;
-      background-color: #f8f9fa;
-    }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
 
-    .table td {
-      vertical-align: middle;
-    }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
 
-    .table-danger td {
-      color: #dc3545;
-    }
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
 
-    .table-success td {
-      color: #28a745;
-    }
+        /* Additional table styles */
+        .table-danger td {
+            color: #dc3545;
+        }
 
-    .modal-header {
-      background-color: #007bff;
-      color: #fff;
-    }
+        /* Modal header */
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+        }
 
-    .modal-title {
-      font-weight: 600;
-    }
-
-    .btn-danger {
-      background-color: #dc3545;
-      border-color: #dc3545;
-    }
-
-    .btn-danger:hover {
-      background-color: #c82333;
-      border-color: #bd2130;
-    }
-
-    .btn-success {
-      background-color: #28a745;
-      border-color: #28a745;
-    }
-
-    .btn-success:hover {
-      background-color: #218838;
-      border-color: #1e7e34;
-    }
-  </style>
+        .modal-title {
+            font-weight: 600;
+        }
+    </style>
 </head>
+
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand">MediCare</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Greeting line with username -->
+                    <li class="nav-item me-3">
+                        <span class="nav-link disabled text-white">
+                            <i class="fas fa-user me-2"></i>
+                            Hello, {{ username }}
+                        </span>
+                    </li>
+                    <!-- Logout button -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="/landing">MediCare</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <!-- Add greeting line with username -->
-        <li class="nav-item me-3">
-          <span class="nav-link disabled text-white">
-            <i class="fas fa-user me-2"></i>
-            Hello, {{ username }}
-          </span>
-        </li>
-        <!-- Add logout button icon -->
-        <li class="nav-item">
-          <a class="nav-link" href="/logout">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </a>
-        </li>
-      </ul>
+    <!-- Content -->
+    <div class="container mt-4">
+        <h2>Expired Medicines</h2>
+        <div class="container d-flex justify-content-end mb-4">
+          <a href="/landing" class="btn btn-primary"><i class="fas fa-arrow-left me-1"></i>Home</a>
+        </div>        
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Sr. No.</th>
+                    <th>Name</th>
+                    <th>Expiry Date</th>
+                    <th>Installation Date</th>
+                    <th>Quantity</ch>
+                    <th>Days</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop through expired medicines data -->
+                {% for medicine in expired_medicines %}
+                <tr {% if medicine[5] | int <= 0 %} class="table-danger" {% endif %}>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ medicine[1] }}</td>
+                    <td>{{ medicine[2] }}</td>
+                    <td>{{ medicine[3] }}</td>
+                    <td>{{ medicine[4] }}</td>
+                    <td>
+                        {% if medicine[5] <= 0 %}
+                            Expired
+                        {% else %}
+                            {{ medicine[5] }} days
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-center">
+                            <!-- Delete Button with Trash Icon -->
+                            <button type="button" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal" data-bs-target="#deleteModal{{ medicine[0] }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <!-- Update Button with Pencil Icon -->
+                            <button type="submit" class="btn btn-primary btn-sm" id="updateInfoBtn" data-bs-toggle="modal" data-bs-target="#updateModal{{ medicine[0] }}">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-  </div>
-</nav>
 
-<!-- Content -->
-<div class="container mt-4">
-  <h2>Expired Medicines</h2>
-  <table class="table table-bordered table-hover">
-    <thead class="thead-light">
-      <tr>
-        <th>Name</th>
-        <th>Expiry Date</th>
-        <th>Installation Date</th>
-        <th>Quantity</th>
-        <th>Days</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for medicine in expired_medicines %}
-      <tr {% if medicine[5] | int <= 0 %} class="table-danger" {% endif %}>
-        <td>{{ medicine[1] }}</td>
-        <td>{{ medicine[2] }}</td>
-        <td>{{ medicine[3] }}</td>
-        <td>{{ medicine[4] }}</td>
-        <td>
-          {% if medicine[5] <= 0 %}
-            Expired
-          {% else %}
-            {{ medicine[5] }} days
-          {% endif %}
-        </td>
-        <td>
-          <div class="d-flex">
-            <!-- Delete Button with Trash Icon -->
-            <button type="button" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal" data-bs-target="#deleteModal{{ medicine[0] }}">
-              <i class="fas fa-trash"></i>
-            </button>
-            <!-- Update Button with Pencil Icon -->
-            <button type="submit" class="btn btn-primary btn-sm" id="updateInfoBtn" data-bs-toggle="modal" data-bs-target="#updateModal{{ medicine[0] }}">
-              <i class="fas fa-pencil-alt"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
+
 </html>

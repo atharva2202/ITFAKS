@@ -123,7 +123,10 @@
     <h2>Medicine Inventory</h2>
     <!-- Add Info Button -->
     <div class="d-flex justify-content-end">
-      <button type="button" class="btn btn-primary me-2" id="addInfoBtn" data-bs-toggle="modal" data-bs-target="#addInfoModal">
+      <form action="/export_to_excel" method="GET">
+        <button type="submit" class="btn btn-primary me-1">Export</button>
+      </form>
+      <button type="button" class="btn btn-primary me-1" id="addInfoBtn" data-bs-toggle="modal" data-bs-target="#addInfoModal">
           <i class="fas fa-plus me-2"></i> Add Info
       </button>
       <a href="/expired_medicines" class="btn btn-danger">View Expired Medicines</a>
@@ -336,3 +339,33 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>
+
+<!-- Script to handle export button click -->
+<script>
+  document.getElementById("exportBtn").addEventListener("click", function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/export_to_excel", true);
+    xhr.responseType = "blob";
+
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // Create a Blob from the response
+        var blob = new Blob([xhr.response], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        
+        // Create a link element to download the Excel file
+        var link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "medicine_inventory.xlsx";
+        
+        // Append the link to the document body and trigger the click event
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup
+        document.body.removeChild(link);
+      }
+    };
+
+    xhr.send();
+  });
+</script>

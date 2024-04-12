@@ -1,12 +1,16 @@
 from flask import Flask, render_template, request, redirect, session, send_from_directory
 import sqlite3
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import schedule
 import time
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font, Alignment
+from openpyxl.styles import Alignment, Border, Side
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -121,12 +125,6 @@ def landing():
         if expired_message:
             message_body += "Expired Medicines:\n" + expired_message + "\n"
 
-        # Send email with concatenated message body
-        """ current_time = datetime.now()
-        if current_time.hour == 11 and current_time.minute == 21:
-            if message_body:
-                send_mail("Medicine Expiry Alert", message_body, ['ashishjoshi2021.it@mmcoe.edu.in', 'atharvaphadke2021.it@mmcoe.edu.in', 'soahammohaadkar2021.it@mmcoe.edu.in'])
- """
         return render_template('landing.html', medicines=medicines, username=session['username'])
 
     else:
@@ -204,6 +202,117 @@ def update_info(medicine_id):
             return redirect('/landing')
     else:
         return redirect('/')
+    
+@app.route('/export_to_excel')
+def export_to_excel():
+    # Fetch medicines from the database
+    conn = sqlite3.connect('medicine.db')
+    c = conn.cursor()
+    c.execute("SELECT name, expiry_date, installation_date, quantity, days_remaining FROM medicines where days_remaining > 0 ORDER BY name ASC")
+    medicines = c.fetchall()
+    conn.close()
+
+    # Create a new Excel workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Medicine Inventory"
+
+    ws.merge_cells('A1:F1')
+    main_cell = ws['A1']
+    main_cell.alignment = Alignment(horizontal='center', vertical='center')
+    main_cell.value = "Active Medicines"
+    main_cell.font = Font(bold=True, size=14)
+    # Write headers to the first row
+    ws.append(["Sr. No", "Name", "Installation Date", "Expiry Date", "Quantity", "Expiring within"])
+
+    # Write data rows
+    for idx, med in enumerate(medicines, start=1):
+        remaining_days = med[4]
+        if remaining_days is not None and remaining_days != '':
+            remaining_days = int(remaining_days)
+            months = remaining_days // 30
+            days = remaining_days % 30
+            if months > 0:
+                remaining_text = f"{months} months, {days} days"
+            elif days > 0:
+                remaining_text = f"{days} days"
+            else:
+                remaining_text = "Medicine Expired"
+        else:
+            remaining_text = "No expiry date"
+
+        ws.append([idx, med[0], med[2], med[1], med[3], remaining_text])
+
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+    for row_num, row in enumerate(ws.iter_rows(), start=1):
+        for cell in row:
+            border = Border(left=Side(style='thin'), 
+                            right=Side(style='thin'), 
+                            top=Side(style='thin'), 
+                            bottom=Side(style='thin'))
+            cell.border = border
+
+    for col in ws.columns:
+        max_length = 1
+        column = col[1].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2) * 1.2
+        ws.column_dimensions[column].width = adjusted_width
+
+    for _ in range(2):  # Adjust the number of empty rows as needed
+        ws.append([])
+    
+    last_row_index = ws.max_row + 2
+
+    # Calculate the row index of the immediate row after the empty rows
+    header_row_index = last_row_index + 1
+
+    # Merge cells for the header row
+    ws.merge_cells(start_row=header_row_index, start_column=1, end_row=header_row_index, end_column=6)
+
+    # Access the header cell
+    header_cell = ws.cell(row=header_row_index, column=1)
+
+    # Write "Expired Medicines" in the merged cell
+    header_cell.value = "Expired Medicines"
+    header_cell.alignment = Alignment(horizontal='center', vertical='center')
+    header_cell.font = Font(bold=True, size=14)
+    ws.append(["Sr. No", "Name", "Installation Date", "Expiry Date", "Quantity", "Expiring within"])
+# Append the medicines whose expiry date is less than zero
+    conn = sqlite3.connect('medicine.db')
+    c = conn.cursor()
+    c.execute("SELECT name, expiry_date, installation_date, quantity, days_remaining FROM medicines where days_remaining <= 0 ORDER BY name ASC")
+    medicines = c.fetchall()
+    conn.close()
+    for idx, med in enumerate(medicines, start=1):
+        ws.append([idx, med[0], med[2], med[1], med[3], "Expired"])
+
+    # Adjust the border and alignment for the new rows
+    max_row = ws.max_row
+    for row_num in range(max_row - len(medicines), max_row + 1):
+        for cell in ws[row_num]:
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            border = Border(left=Side(style='thin'), 
+                            right=Side(style='thin'), 
+                            top=Side(style='thin'), 
+                            bottom=Side(style='thin'))
+            cell.border = border
+
+    # Save the workbook to a temporary file
+    excel_filename = "medicine_inventory.xlsx"
+    excel_path = os.path.join(app.root_path, excel_filename)
+    wb.save(excel_path)
+
+    # Return a download link to the Excel file
+    return send_from_directory(app.root_path, excel_filename, as_attachment=True)
 
 # Route for logout
 @app.route('/logout')

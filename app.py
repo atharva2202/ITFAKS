@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, send_from_directory
+from flask import Flask, render_template, request, redirect, session, send_from_directory,send_file
 import sqlite3
 import os
 from datetime import datetime
@@ -11,6 +11,10 @@ from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment
 from openpyxl.styles import Alignment, Border, Side
+from docx import Document
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_ALIGN_VERTICAL, WD_TABLE_ALIGNMENT
+from flask import send_file
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -142,6 +146,56 @@ def expired_medicines():
         return render_template('expired_medicines.html', expired_medicines=expired_medicines, username=session['username'])
     else:
         return redirect('/')
+
+# Route to handle update action for expired medicines
+@app.route('/update_expired_medicine/<int:medicine_id>', methods=['POST'])
+def update_expired_medicine(medicine_id):
+    if 'username' in session:
+        if request.method == 'POST':
+            name = request.form['medicineName']
+            expiry_date = request.form['expiryDate']
+            installation_date = request.form['installationDate']
+            quantity = request.form['medicineQuantity']
+            
+            # Update the medicine record in the database
+            conn = sqlite3.connect('medicine.db')
+            c = conn.cursor()
+            c.execute("UPDATE medicines SET name=?, expiry_date=?, installation_date=?, quantity=? WHERE id=?",
+                      (name, expiry_date, installation_date, quantity, medicine_id))
+            conn.commit()
+            
+            # Check if the expiry date is ahead
+            if expiry_date > datetime.today().strftime('%Y-%m-%d'):
+                # Move the medicine from expired to landing page
+                c.execute("DELETE FROM expired_medicines WHERE id=?", (medicine_id,))
+                conn.commit()
+                # Add the medicine to the landing page
+                c.execute("INSERT INTO medicines (name, expiry_date, installation_date, quantity) VALUES (?, ?, ?, ?)",
+                          (name, expiry_date, installation_date, quantity))
+                conn.commit()
+                conn.close()
+                return redirect('/landing')
+            else:
+                conn.close()
+                return redirect('/expired_medicines')
+    else:
+        return redirect('/')
+
+# Route to handle delete action for expired medicines
+@app.route('/delete_expired_medicine/<int:medicine_id>', methods=['POST'])
+def delete_expired_medicine(medicine_id):
+    if 'username' in session:
+        if request.method == 'POST':
+            # Delete the medicine record from the database
+            conn = sqlite3.connect('medicine.db')
+            c = conn.cursor()
+            c.execute("DELETE FROM expired_medicines WHERE id=?", (medicine_id,))
+            conn.commit()
+            conn.close()
+            return redirect('/expired_medicines')
+    else:
+        return redirect('/')
+
 
 # Route to add medicine info    
 @app.route('/add_info', methods=['POST'])
@@ -286,7 +340,7 @@ def export_to_excel():
     header_cell.alignment = Alignment(horizontal='center', vertical='center')
     header_cell.font = Font(bold=True, size=14)
     ws.append(["Sr. No", "Name", "Installation Date", "Expiry Date", "Quantity", "Expiring within"])
-# Append the medicines whose expiry date is less than zero
+    # Append the medicines whose expiry date is less than zero
     conn = sqlite3.connect('medicine.db')
     c = conn.cursor()
     c.execute("SELECT name, expiry_date, installation_date, quantity, days_remaining FROM medicines where days_remaining <= 0 ORDER BY name ASC")
@@ -313,6 +367,108 @@ def export_to_excel():
 
     # Return a download link to the Excel file
     return send_from_directory(app.root_path, excel_filename, as_attachment=True)
+
+@app.route('/export_to_word')
+def export_to_word():
+    # Read the preset header file
+    with open('Header.docx', 'rb') as header_file:
+        header_doc = Document(header_file)
+    
+    # Add current date
+    current_date = header_doc.add_paragraph()
+    current_date.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    date_run = current_date.add_run("Date: " + datetime.now().strftime('%d/%m/%Y'))
+    date_run.bold = True
+
+    # Fetch active medicines from the database
+    conn = sqlite3.connect('medicine.db')
+    c = conn.cursor()
+    c.execute("SELECT name, expiry_date, installation_date, quantity, days_remaining FROM medicines WHERE days_remaining > 0 ORDER BY name ASC")
+    active_medicines = c.fetchall()
+
+    # Fetch expired medicines from the database
+    c.execute("SELECT name, expiry_date, installation_date, quantity, days_remaining FROM medicines WHERE days_remaining <= 0 ORDER BY name ASC")
+    expired_medicines = c.fetchall()
+
+    conn.close()
+
+    # Add active medicines table to the document
+    if active_medicines:
+        # Add header for active medicines
+        act_head = header_doc.add_heading("Active Medicines", level=1)
+        act_head.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        # Add table for active medicines
+        table_active = header_doc.add_table(rows=1, cols=6) 
+        table_active.alignment = WD_TABLE_ALIGNMENT.CENTER       
+
+        # Add headers to the active medicines table
+        hdr_cells = table_active.rows[0].cells
+        hdr_cells[0].text = 'Sr. No'
+        hdr_cells[1].text = 'Name'
+        hdr_cells[2].text = 'Installation Date'
+        hdr_cells[3].text = 'Expiry Date'
+        hdr_cells[4].text = 'Quantity'
+        hdr_cells[5].text = 'Expiring within'
+
+        # Add data rows for active medicines
+        for idx, med in enumerate(active_medicines, start=1):
+            remaining_days = med[4]
+            if remaining_days is not None and remaining_days != '':
+                remaining_days = int(remaining_days)
+                months = remaining_days // 30
+                days = remaining_days % 30
+                if months > 0:
+                    remaining_text = f"{months} months, {days} days"
+                elif days > 0:
+                    remaining_text = f"{days} days"
+                else:
+                    remaining_text = "Medicine Expired"
+            else:
+                remaining_text = "No expiry date"
+
+            row_cells = table_active.add_row().cells
+            row_cells[0].text = str(idx)
+            row_cells[1].text = med[0]
+            row_cells[2].text = med[2]
+            row_cells[3].text = med[1]
+            row_cells[4].text = str(med[3])
+            row_cells[5].text = remaining_text
+
+    # Add expired medicines table to the document
+    if expired_medicines:
+        # Add header for expired medicines
+        exp_head = header_doc.add_heading("Expired Medicines", level=1)
+        exp_head.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        # Add table for expired medicines
+        table_expired = header_doc.add_table(rows=1, cols=6)
+        table_expired.alignment = WD_TABLE_ALIGNMENT.CENTER       
+
+        # Add headers to the expired medicines table
+        hdr_cells = table_expired.rows[0].cells
+        hdr_cells[0].text = 'Sr. No'
+        hdr_cells[1].text = 'Name'
+        hdr_cells[2].text = 'Installation Date'
+        hdr_cells[3].text = 'Expiry Date'
+        hdr_cells[4].text = 'Quantity'
+        hdr_cells[5].text = 'Status'
+
+        # Add data rows for expired medicines
+        for idx, med in enumerate(expired_medicines, start=1):
+            row_cells = table_expired.add_row().cells
+            row_cells[0].text = str(idx)
+            row_cells[1].text = med[0]
+            row_cells[2].text = med[2]
+            row_cells[3].text = med[1]
+            row_cells[4].text = str(med[3])
+            row_cells[5].text = "Expired"
+
+    # Save the Word document to a temporary file
+    word_filename = "medicine_inventory.docx"
+    word_path = os.path.join(app.root_path, word_filename)
+    header_doc.save(word_path)
+
+    # Return a download link to the Word file
+    return send_file(word_path, as_attachment=True)
 
 # Route for logout
 @app.route('/logout')
@@ -383,7 +539,7 @@ def send_mail(subject, message, to_email):
 # Function to check and send email at 11 PM
 def check_and_send_email():
     current_time = datetime.now().time()
-    if current_time.hour == 10   and current_time.minute == 20:
+    if current_time.hour == 15   and current_time.minute == 50:
         print("Checking medicines and sending email...")
         # Update days remaining for all medicines
         update_days_remaining()
@@ -441,7 +597,7 @@ def check_and_send_email():
         print("Email sent.")
 
 # Schedule email check every minute
-schedule.every().day.at("10:20").do(check_and_send_email)
+schedule.every().day.at("15:50").do(check_and_send_email)
 
 # Run the scheduler in a separate thread
 def scheduler_thread():

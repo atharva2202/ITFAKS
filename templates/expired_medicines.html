@@ -120,8 +120,8 @@
                 <tr>
                     <th scope="col">Sr. No.</th>
                     <th>Name</th>
-                    <th>Expiry Date</th>
                     <th>Installation Date</th>
+                    <th>Expiry Date</th>
                     <th>Quantity</ch>
                     <th>Days</th>
                     <th>Actions</th>
@@ -133,8 +133,8 @@
                 <tr {% if medicine[5] | int <= 0 %} class="table-danger" {% endif %}>
                     <th scope="row">{{ loop.index }}</th>
                     <td>{{ medicine[1] }}</td>
-                    <td>{{ medicine[2] }}</td>
                     <td>{{ medicine[3] }}</td>
+                    <td>{{ medicine[2] }}</td>
                     <td>{{ medicine[4] }}</td>
                     <td>
                         {% if medicine[5] <= 0 %}
@@ -156,6 +156,64 @@
                         </div>
                     </td>
                 </tr>
+                <div class="modal fade" id="deleteModal{{ medicine[0] }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ medicine[0] }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteModalLabel{{ medicine[0] }}">Confirm Deletion</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete "{{ medicine[1] }}"?
+                        </div>
+                        <div class="modal-footer">
+                          <form action="/delete_info/{{ medicine[0] }}" method="POST">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            
+                  <!-- Update Info Modal -->
+                  <div class="modal fade" id="updateModal{{ medicine[0] }}" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="updateModalLabel">Update Medicine Information</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="modal-body">
+                          <!-- Update Form -->
+                          <form id="updateModalForm" action="/update_info/{{ medicine[0] }}" method="POST">
+                            <div class="mb-3">
+                              <label for="medicineName" class="form-label">Name of Medicine</label>
+                              <input type="text" class="form-control" id="medicineName" name="medicineName" value="{{ medicine[1] }}">
+                            </div>
+                            <div class="mb-3">
+                              <label for="installationDate" class="form-label">Date of Installation</label>
+                              <input type="date" class="form-control" id="installationDate" name="installationDate" value="{{ medicine[3] }}">
+                            </div>
+                            <div class="mb-3">
+                              <label for="expiryDate" class="form-label">Expiry Date</label>
+                              <input type="date" class="form-control" id="expiryDate" name="expiryDate" value="{{ medicine[2] }}">
+                            </div>
+                            <div class="mb-3">
+                              <label for="medicineQuantity" class="form-label">Quantity</label>
+                              <input type="number" class="form-control" id="medicineQuantity" name="medicineQuantity" value="{{ medicine[4] }}" required>
+                            </div>
+                           
+                            <!-- Save Button -->
+                            <button type="submit" class="btn btn-success">Save</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 {% endfor %}
             </tbody>
         </table>

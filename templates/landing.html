@@ -94,7 +94,7 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="#">MediCare</a>
+    <a class="navbar-brand">MediCare</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -124,9 +124,12 @@
     <h2>Medicine Inventory</h2>
     <!-- Add Info Button -->
     <div class="d-flex justify-content-end">
-      <form action="/export_to_excel" method="GET">
-        <button type="submit" class="btn btn-primary me-1">Export</button>
+      <form action="/export_to_word" method="GET">
+        <button type="submit" class="btn btn-primary me-1">Export to Word</button>
       </form>
+        <form action="/export_to_excel" method="GET">
+          <button type="submit" class="btn btn-primary me-1">Export to Excel</button>
+        </form>
       <button type="button" class="btn btn-primary me-1" id="addInfoBtn" data-bs-toggle="modal" data-bs-target="#addInfoModal">
           <i class="fas fa-plus me-1"></i>Add Info
       </button>
